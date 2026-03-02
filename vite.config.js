@@ -7,13 +7,11 @@ export default defineConfig({
         port: 5173,
         historyApiFallback: true,
         proxy: {
-            '/chat': 'http://localhost:8000',
-            '/history': 'http://localhost:8000',
-            '/login': 'http://localhost:8000',
-            '/register': 'http://localhost:8000',
-            '/me': 'http://localhost:8000',
-            '/health': 'http://localhost:8000',
-            '/analyze': 'http://localhost:8000',
+            '/api': {
+                target: 'http://localhost:8000',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api/, '')
+            }
         },
     },
 })

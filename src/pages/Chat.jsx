@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Brain, ShieldAlert } from 'lucide-react';
+import { Brain, ShieldAlert, Volume2, VolumeX } from 'lucide-react';
 
 const SUGGESTIONS = [
     "I've been feeling really anxious lately",
@@ -15,11 +15,41 @@ export default function Chat() {
     const [loading, setLoading] = useState(false);
     const [sessions, setSessions] = useState([]);
     const [currentSessionId, setCurrentSessionId] = useState('default');
+    const [speakingId, setSpeakingId] = useState(null);
     const messagesEnd = useRef(null);
 
+    // Stop speaking when component unmounts
     useEffect(() => {
-        loadSessions();
-        loadSessionHistory('default');
+        return () => {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        // Load sessions and then load the history for the most recent one
+        const initChat = async () => {
+            try {
+                const res = await authFetch('/sessions');
+                if (res.ok) {
+                    const data = await res.json();
+                    setSessions(data);
+
+                    // If there are sessions, load the most recent one. Otherwise, load 'default'
+                    if (data && data.length > 0) {
+                        loadSessionHistory(data[0].session_id);
+                    } else {
+                        loadSessionHistory('default');
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load sessions:", err);
+                loadSessionHistory('default');
+            }
+        };
+
+        initChat();
     }, []);
 
     useEffect(() => {
@@ -108,6 +138,59 @@ export default function Chat() {
 
     const handleChip = (text) => {
         sendMessage(null, text);
+    };
+
+    const handleSpeak = (text, index) => {
+        if (!window.speechSynthesis) {
+            alert("Sorry, your browser doesn't support text to speech!");
+            return;
+        }
+
+        // Toggle off if clicking the same speaking message
+        if (speakingId === index) {
+            window.speechSynthesis.cancel();
+            setSpeakingId(null);
+            return;
+        }
+
+        // Cancel any currently playing speech
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // Find a feminine voice
+        const voices = window.speechSynthesis.getVoices();
+        const feminineVoices = voices.filter(v =>
+            v.name.includes("Female") ||
+            v.name.includes("female") ||
+            v.name.includes("Samantha") ||
+            v.name.includes("Victoria") ||
+            v.name.includes("Karen") ||
+            v.name.includes("Tessa") ||
+            v.name.includes("Monica") ||
+            v.name.includes("Moira") ||
+            v.name.includes("Luciana") ||
+            v.name.includes("Amelie") ||
+            v.name.includes("Kyoko") ||
+            v.name.includes("Siri Female") ||
+            v.name.includes("Google UK English Female") ||
+            v.name.includes("Google US English") ||
+            (v.name.includes("English") && v.name.includes("United States") && v.gender === "female") ||
+            (v.name.includes("English") && v.name.includes("UK") && v.gender === "female")
+        );
+
+        // Fallback to the first feminine voice, or default if none exist
+        if (feminineVoices.length > 0) {
+            utterance.voice = feminineVoices[0];
+        }
+
+        utterance.rate = 0.95; // Slightly slower feels more calming/empathetic
+
+        utterance.onend = () => setSpeakingId(null);
+        utterance.onerror = () => setSpeakingId(null);
+
+        setSpeakingId(index);
+        window.speechSynthesis.speak(utterance);
     };
 
     return (
@@ -216,6 +299,17 @@ export default function Chat() {
                                 )}
                                 <div className="message-bubble">
                                     <div style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</div>
+                                    {msg.role === 'bot' && (
+                                        <div className="message-actions">
+                                            <button
+                                                className={`btn-speak ${speakingId === i ? 'active' : ''}`}
+                                                onClick={() => handleSpeak(msg.text, i)}
+                                                title={speakingId === i ? "Stop speaking" : "Listen aloud"}
+                                            >
+                                                {speakingId === i ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
