@@ -124,9 +124,15 @@ export default function Chat() {
                     <p>Your safe space</p>
                 </div>
 
-                <div className="sidebar-section-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }} onClick={startNewChat}>
+                <div style={{ padding: '16px 16px 0' }}>
+                    <button className="btn-new-chat" onClick={startNewChat}>
+                        <span style={{ fontSize: '18px', lineHeight: 1 }}>+</span>
+                        <span>New Chat</span>
+                    </button>
+                </div>
+
+                <div className="sidebar-section-label">
                     <span>Past Chats</span>
-                    <span style={{ fontSize: '18px', color: 'var(--blue)' }}>+</span>
                 </div>
 
                 <div className="sidebar-history">

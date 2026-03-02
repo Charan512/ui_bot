@@ -549,6 +549,29 @@ body {
   padding: 14px 18px 7px;
 }
 
+.btn-new-chat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-new-chat:hover {
+  background: #fff;
+  border-color: var(--blue-soft);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
 .sidebar-history {
   flex: 1;
   overflow-y: auto;
