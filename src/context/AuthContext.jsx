@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
 
     useEffect(() => {
         if (token) {
-            fetch(`${API}/me`, { headers: { Authorization: `Bearer ${token}` } })
+            fetch(`${API}/me`, { headers: { Authorization: `Bearer ${token}`, 'ngrok-skip-browser-warning': 'true' } })
                 .then(r => {
                     if (!r.ok) throw new Error('Invalid token');
                     return r.json();
@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
     const login = async (username, password) => {
         const res = await fetch(`${API}/login`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
             body: JSON.stringify({ username, password }),
         });
         if (!res.ok) {
@@ -44,7 +44,7 @@ export function AuthProvider({ children }) {
     const register = async (username, password, emergency_contact) => {
         const res = await fetch(`${API}/register`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
             body: JSON.stringify({ username, password, emergency_contact }),
         });
         if (!res.ok) {
@@ -69,6 +69,7 @@ export function AuthProvider({ children }) {
             ...options,
             headers: {
                 'Content-Type': 'application/json',
+                'ngrok-skip-browser-warning': 'true',
                 Authorization: `Bearer ${token}`,
                 ...options.headers,
             },
